@@ -474,7 +474,7 @@ function sec(t,b,a){var k=t.split(' ')[0],add=(a&&adm())?'<div style="text-align
 A.pacc=function(k){proOpen[k]=!proOpen[k];renderPro()};
 
 /* ===== MODE WEB MANDIRI: Google Spreadsheet + login sendiri ===== */
-var API='PASTE_URL_WEB_APP_DI_SINI',REMOTE=/^https:\/\//.test(API),TOK='',LOADED=false,SAV=false,stm,SEEN={},SEENV={},lgF='Semua';
+var API='https://script.google.com/macros/s/AKfycbwGGoYXH-8pQvcS8Y8hNViibjWHs1eWzenLbeOXCOtshP3G-EFBv6nhy9Ndcau4GMhvlw/exec',REMOTE=/^https:\/\//.test(API),TOK='',LOADED=false,SAV=false,stm,SEEN={},SEENV={},lgF='Semua';
 try{TOK=localStorage.getItem('santri-tok')||''}catch(e){}
 function ensureK(){}
 function api(a,d){return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({a:a,tok:TOK},d||{}))}).then(function(r){return r.json()})}
