@@ -1,0 +1,16 @@
+{
+  "name": "Aplikasi Santri",
+  "short_name": "Santri",
+  "description": "Aplikasi pesantren digital: data santri, absen, nilai, hafalan, tabungan, perpustakaan, dan Al-Qur'an",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1f5f2",
+  "theme_color": "#0c7a54",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
