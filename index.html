@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="id"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>KAMAR KITA</title>
+<title>Aplikasi Santri</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0c7a54">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -113,10 +113,10 @@ body.nolink .view{display:none!important}body.santri .adm{display:none!important
 .menu{grid-template-columns:repeat(4,1fr)}.lg{padding:11px 0;border-bottom:1px solid var(--bd);font-size:12.5px}.lg small{display:block;color:var(--soft)}
 </style></head>
 <body class="">
-<div class="lgn" id="lgn" style="display:none"><div class="card" style="width:100%;max-width:380px;padding:26px 22px"><div class="logo" style="margin:0 auto 12px;width:58px;height:58px;font-size:28px;border-radius:18px">☪</div><h2 style="text-align:center;margin:0 0 4px;font-size:20px">KAMAR KITA</h2><p style="text-align:center;color:var(--soft);font-size:12.5px;margin:0 0 16px">Masuk dengan akun Anda</p><input class="srch" id="lu" placeholder="Username" autocapitalize="none" autocomplete="username"><input class="srch" id="lp" type="password" placeholder="Kata sandi" autocomplete="current-password"><div id="le" style="color:#c24b4b;font-size:12.5px;min-height:18px;margin-bottom:8px"></div><button class="btn" id="lb" style="width:100%">Masuk</button></div></div>
+<div class="lgn" id="lgn" style="display:none"><div class="card" style="width:100%;max-width:380px;padding:26px 22px"><div class="logo" style="margin:0 auto 12px;width:58px;height:58px;font-size:28px;border-radius:18px">☪</div><h2 style="text-align:center;margin:0 0 4px;font-size:20px">Aplikasi Santri</h2><p style="text-align:center;color:var(--soft);font-size:12.5px;margin:0 0 16px">Masuk dengan akun Anda</p><input class="srch" id="lu" placeholder="Username" autocapitalize="none" autocomplete="username"><input class="srch" id="lp" type="password" placeholder="Kata sandi" autocomplete="current-password"><div id="le" style="color:#c24b4b;font-size:12.5px;min-height:18px;margin-bottom:8px"></div><button class="btn" id="lb" style="width:100%">Masuk</button></div></div>
 <div class="app">
 <header class="top"><button class="ib" id="back" style="display:none">‹</button><div class="logo">☪</div>
-<div><h1>FS2M JABODETABEK</h1><small id="orgT"></small></div><div class="sp"></div>
+<div><h1>Aplikasi Santri</h1><small id="orgT"></small></div><div class="sp"></div>
 <button class="ib" id="who" style="width:auto;padding:0 12px;font-size:12px;font-weight:700">👤 Admin</button><button class="ib" id="theme">🌙</button></header>
 <main>
 <div class="card note" id="gate" style="display:none;margin-bottom:12px"></div>
@@ -140,7 +140,7 @@ body.nolink .view{display:none!important}body.santri .adm{display:none!important
 </section>
 <section class="view" id="v-org"><div class="card ag"><div class="ad">🏛</div><div style="flex:1"><b id="orgN"></b><span>10 organisasi · <span id="tot">0</span> pengurus</span></div><button class="ib" data-act="eon">✎</button></div><h3>Struktur Kepengurusan</h3><div id="orgs"></div></section>
 <section class="view" id="v-mat"><button class="btn" style="width:100%;margin-bottom:12px" data-act="gdl" data-a="M">+ Tambah dari Google Drive</button><input type="file" id="fiM" accept=".doc,.docx,.pdf" multiple hidden><div class="dg" id="dM"></div></section>
-<section class="view" id="v-pus"><button class="btn adm" style="width:100%;margin-bottom:12px" data-act="gdl" data-a="P">+ Tambah kitab dari Google Drive</button><input type="file" id="fiP" accept=".pdf" multiple hidden><input class="srch" id="ps" placeholder="Cari kitab..."><div class="dg" id="dP"></div></section>
+<section class="view" id="v-pus"><button class="btn adm" style="width:100%;margin-bottom:12px" data-act="gdl" data-a="P">+ Tambah kitab dari Google Drive</button><button class="btn o adm" style="width:100%;margin-bottom:12px" data-act="gfold">📁 Impor banyak kitab dari folder Drive</button><button class="btn o adm" style="width:100%;margin-bottom:12px" data-act="gbulk">📋 Tempel banyak tautan sekaligus</button><input type="file" id="fiP" accept=".pdf" multiple hidden><input class="srch" id="ps" placeholder="Cari kitab..."><div class="dg" id="dP"></div></section>
 <section class="view" id="v-san"><div class="up" data-up="xi"><div style="font-size:26px">📊</div><b>Unggah data santri (Excel)</b><div style="font-size:11.5px;color:var(--soft);margin-top:4px">Kolom: Nama, Tempat Tanggal Lahir, Alamat, Kelas, Kamar</div></div><input type="file" id="xi" accept=".xlsx,.xls,.csv" hidden>
 <div class="seg" style="margin-bottom:10px"><input class="srch" id="ss" placeholder="Cari santri..." style="margin:0;flex:1;margin-right:8px"><button class="btn" data-act="sad">+ Santri</button><button class="btn o" data-act="sx" style="margin-left:6px">⬇ Excel</button></div><div id="sl"></div><button class="add adm" data-act="mkall">🔑 Buat akun semua santri (unduh Excel)</button></section>
 <section class="view" id="v-abs"><div id="ab"></div></section>
@@ -235,7 +235,7 @@ var NM="Ahmad Fauzan,Muhammad Rizki,Bilal Hakim,Umar Abdullah,Siti Aminah,Nur Ha
 function seed(){var id=1,k=0,O=T.map(function(t,i){return{id:i+1,n:t[0],open:i===0,m:t[1].split(",").map(function(r){k++;return{id:id++,n:NM[(k*4)%NM.length],j:r,k:KL[k%KL.length],r:'A-'+(k%9+1)}})}});
  var s1=mk(101,"Ahmad Fauzan","Malang, 12 Mei 2010","Jl. Merdeka No. 5, Malang","Kelas 2 Tsanawiyah","A-3"),s2=mk(102,"Muhammad Rizki","Surabaya, 3 Maret 2009","Jl. Pahlawan No. 18, Surabaya","Kelas 3 Tsanawiyah","B-1"),s3=mk(103,"Bilal Hakim","Blitar, 20 Januari 2008","Dsn. Sumber, Blitar","Kelas 1 Aliyah","B-4");
  s1.nilai=[{m:'Fiqih',v:88},{m:'Nahwu',v:82}];s1.absen=[{d:'2026-07-10',s:'Hadir'},{d:'2026-07-11',s:'Hadir'},{d:'2026-07-12',s:'Izin'}];s1.haf=[{s:"An-Naba'",a:'1-40',d:'2026-07-01'}];s1.tab=[{t:'2026-07-01T08:00:00.000Z',j:'Pemasukan',n:200000,k:'Uang saku'}];
- return{org:"Kamar Kita",O:O,nid:1000,S:[s1,s2,s3],P:[],M:[{id:1,n:"Notulensi Rapat Pleno I",t:"doc",z:"248 KB",d:"2 Jul 2026"},{id:2,n:"Tata Tertib Sidang Tahunan",t:"pdf",z:"512 KB",d:"28 Jun 2026"}],log:[]}}
+ return{org:"Pondok Pesantren Al-Amin",O:O,nid:1000,S:[s1,s2,s3],P:[],M:[{id:1,n:"Notulensi Rapat Pleno I",t:"doc",z:"248 KB",d:"2 Jul 2026"},{id:2,n:"Tata Tertib Sidang Tahunan",t:"pdf",z:"512 KB",d:"28 Jun 2026"}],log:[]}}
 var DB;try{DB=JSON.parse(localStorage.getItem(KEY))}catch(e){}var fresh=!DB||!DB.S;if(fresh){DB=seed();addDemo()}
 var ADMV=['org','mat','san','log','abs','gd'],JNS=['Pemasukan','Pengeluaran'],KEP=['Uang saku','Jajan / kantin','Buku & kitab','Kebutuhan harian','Syahriyah / iuran','Kesehatan','Transportasi','Lainnya'];
 function sn(id){return DB.S.filter(function(s){return s.id==id})[0]}
@@ -250,7 +250,7 @@ function today(){return nowL().slice(0,10)}
 
 /* ---- Form generik ---- */
 function form(title,fields,cb,ok,vals){vals=vals||{};$('ft').textContent=title;
- $('ff').innerHTML=fields.map(function(f){var v=vals[f.k]!=null?vals[f.k]:(f.def||'');return '<label class="lb">'+f.l+'</label>'+(f.o?'<select id="f_'+f.k+'">'+f.o.map(function(o){return '<option'+(o==v?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select>':'<input id="f_'+f.k+'" type="'+(f.t||'text')+'" value="'+esc(v)+'">')}).join('');
+ $('ff').innerHTML=fields.map(function(f){var v=vals[f.k]!=null?vals[f.k]:(f.def||'');return '<label class="lb">'+f.l+'</label>'+(f.o?'<select id="f_'+f.k+'">'+f.o.map(function(o){return '<option'+(o==v?' selected':'')+'>'+esc(o)+'</option>'}).join('')+'</select>':(f.t==='textarea'?'<textarea id="f_'+f.k+'" rows="8" style="width:100%;padding:12px 14px;margin-bottom:10px;border-radius:12px;border:1px solid var(--bd);background:var(--sf2);color:var(--tx);font:inherit;font-size:13px">'+esc(v)+'</textarea>':'<input id="f_'+f.k+'" type="'+(f.t||'text')+'" value="'+esc(v)+'">'))}).join('');
  $('fs').textContent=ok||'Simpan';$('fm').classList.add('on');
  $('fs').onclick=function(){var r={};for(var i=0;i<fields.length;i++){var f=fields[i],x=$('f_'+f.k).value.trim();if(!x&&!f.opt){toast(f.l+' wajib diisi');return}r[f.k]=x}$('fm').classList.remove('on');cb(r)}}
 $('fc').onclick=function(){$('fm').classList.remove('on')};
@@ -474,7 +474,7 @@ function sec(t,b,a){var k=t.split(' ')[0],add=(a&&adm())?'<div style="text-align
 A.pacc=function(k){proOpen[k]=!proOpen[k];renderPro()};
 
 /* ===== MODE WEB MANDIRI: Google Spreadsheet + login sendiri ===== */
-var API='https://script.google.com/macros/s/AKfycbwGGoYXH-8pQvcS8Y8hNViibjWHs1eWzenLbeOXCOtshP3G-EFBv6nhy9Ndcau4GMhvlw/exec',REMOTE=/^https:\/\//.test(API),TOK='',LOADED=false,SAV=false,stm,SEEN={},SEENV={},lgF='Semua';
+var API='PASTE_URL_WEB_APP_DI_SINI',REMOTE=/^https:\/\//.test(API),TOK='',LOADED=false,SAV=false,stm,SEEN={},SEENV={},lgF='Semua';
 try{TOK=localStorage.getItem('santri-tok')||''}catch(e){}
 function ensureK(){}
 function api(a,d){return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({a:a,tok:TOK},d||{}))}).then(function(r){return r.json()})}
@@ -492,7 +492,7 @@ var _ra=renderAll;renderAll=function(){_ra();var st=document.querySelector('.sta
 var _go=go;go=function(v){_go(v);if(REMOTE&&!adm()&&LOADED&&!SEENV[v]){SEENV[v]=1;lg('Membuka menu '+({home:'Beranda',pus:'Perpustakaan',tab:'Tabungan',qur:"Al-Qur'an",pro:'Profil',rap:'Raport',menu:'Menu'}[v]||v))}};
 /* login */
 function showLogin(msg){$('lgn').style.display='flex';$('le').textContent=msg||''}
-function applyLoad(r,first){DB=r.db||{org:'Kamar Kita',O:[],nid:1000,S:[],P:[],M:[],G:[],N:[],log:[]};['O','S','P','M','G','N'].forEach(function(k){if(!DB[k])DB[k]=[]});if(!DB.log)DB.log=[];ACT=r.log||[];SEEN=r.seen||{};
+function applyLoad(r,first){DB=r.db||{org:'Pondok Pesantren',O:[],nid:1000,S:[],P:[],M:[],G:[],N:[],log:[]};['O','S','P','M','G','N'].forEach(function(k){if(!DB[k])DB[k]=[]});if(!DB.log)DB.log=[];ACT=r.log||[];SEEN=r.seen||{};
  if(first){me=r.role==='admin'?'admin':r.sid;viewS=me==='admin'?null:me;LOADED=true;SEENV={};$('lgn').style.display='none'}renderAll();if(first){go('home');setSync('Terhubung ke Google Spreadsheet')}}
 function loadRemote(){return api('load').then(function(r){if(!r.ok){TOK='';try{localStorage.removeItem('santri-tok')}catch(e){}showLogin(r.err);return}applyLoad(r,true)}).catch(function(){showLogin('Tidak bisa terhubung ke server. Periksa internet Anda.')})}
 $('lb').onclick=function(){var u=$('lu').value.trim(),p=$('lp').value;if(!u||!p){$('le').textContent='Isi username dan kata sandi';return}$('lb').disabled=true;$('le').textContent='';
@@ -514,6 +514,13 @@ A.sdel=function(a){var x=sn(a);form('Hapus santri '+x.n+'? Nilai, absen, hafalan
 /* file lewat Google Drive */
 function driveId(u){var m=String(u||'').match(/\/d\/([\w-]+)|[?&]id=([\w-]+)/);return m?(m[1]||m[2]):''}
 A.gdl=function(k){form('Tambah dari Google Drive',[{k:'n',l:'Judul'},{k:'u',l:'Tautan Google Drive (Bagikan: Siapa saja yang memiliki link)'},{k:'j',l:'Jenis',o:['PDF','Word','Lainnya']}],function(r){if(!driveId(r.u)){toast('Tautan Google Drive tidak valid');return}DB[k].unshift({id:DB.nid++,n:r.n,t:r.j==='PDF'?'pdf':'doc',u:r.u,z:'Google Drive',d:fd()});lg('Menambah '+(k==='P'?'kitab ':'materi ')+r.n);R()},'Tambah')};
+A.gbulk=function(){form('Tempel Banyak Tautan Kitab',[{k:'t',l:'Satu kitab per baris. Format: Judul | tautan Google Drive (judul boleh dikosongkan, cukup tautan)',t:'textarea'}],function(r){var have={},add=[],bad=0,dup=0;DB.P.forEach(function(q){have[driveId(q.u)]=1});
+ r.t.split(/\r?\n/).forEach(function(line){line=line.trim();if(!line)return;var i=line.lastIndexOf('|'),ti=i>-1?line.slice(0,i).trim():'',u=(i>-1?line.slice(i+1):line).trim(),m=u.match(/https?:\/\/\S+/);u=m?m[0]:u;var id=driveId(u);if(!id){bad++;return}if(have[id]){dup++;return}have[id]=1;add.push({id:DB.nid++,n:ti||('Kitab '+(add.length+1)),t:'pdf',u:u,z:'Google Drive',d:fd()})});
+ if(!add.length){toast(bad?bad+' baris tidak berisi tautan Google Drive yang valid':'Tidak ada tautan baru');return}
+ DB.P=add.concat(DB.P);lg('Tempel banyak tautan: '+add.length+' kitab');R();toast(add.length+' kitab ditambahkan'+(dup?', '+dup+' sudah ada':'')+(bad?', '+bad+' baris dilewati':''))},'Tambahkan')};
+A.gfold=function(){form('Impor dari Folder Google Drive',[{k:'u',l:'Tautan folder Google Drive'}],function(r){toast('Membaca folder, mohon tunggu...');api('folder',{url:r.u}).then(function(x){if(!x.ok){toast(x.err||'Gagal membaca folder');return}
+ var have={};DB.P.forEach(function(q){have[driveId(q.u)]=1});var add=[];x.list.forEach(function(q){var id=driveId(q.u);if(!id||have[id])return;have[id]=1;add.push({id:DB.nid++,n:q.n,t:'pdf',u:q.u,z:q.s?(Math.round(q.s/104857.6)/10)+' MB':'Google Drive',d:fd()})});
+ DB.P=add.concat(DB.P);lg('Impor folder Drive: '+add.length+' kitab');R();toast(add.length+' kitab ditambahkan'+(x.priv?'. '+x.priv+' file belum dibagikan ke "siapa saja yang memiliki link", santri tidak bisa membukanya.':'')+(x.penuh?' Batas 500 file tercapai, impor lagi dari subfolder lain.':''))}).catch(function(){toast('Tidak bisa terhubung ke server')})},'Impor')};
 A.fv=function(k,id){var it=itm(k,id),f=driveId(it&&it.u);if(!f){toast('Ini data contoh tanpa file. Hapus, lalu tambahkan dari Google Drive.');return}$('vt').textContent=it.n;$('vb').innerHTML='<iframe src="https://drive.google.com/file/d/'+f+'/preview" style="flex:1;border:0;width:100%" allow="autoplay"></iframe>';$('vd').onclick=function(){A.fd(k,id)};$('vm').classList.add('on');lg('Membuka '+it.n)};
 A.fd=function(k,id){var it=itm(k,id),f=driveId(it&&it.u);if(!f){toast('Tautan tidak valid');return}lg('Mengunduh '+it.n);var a=document.createElement('a');a.href='https://drive.google.com/uc?export=download&id='+f;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove()};
 A.ff=function(k,id){var it=itm(k,id);form('Hapus "'+it.n+'"?',[],function(){DB[k]=DB[k].filter(function(x){return x.id!=id});lg('Menghapus '+it.n);R()},'Hapus')};
