@@ -6,7 +6,7 @@
 
 // >>> WAJIB DIUBAH sebelum deploy <<<
 var ADMIN_USER = 'admin';
-var ADMIN_PASS = 'GANTI-PASSWORD-INI';
+var ADMIN_PASS = '88347931';
 var SESI_HARI = 30;           // lama login tetap aktif (hari)
 
 /* ---------- Pintu masuk ---------- */
@@ -51,6 +51,7 @@ function route(q) {
     case 'mkak': var r = mkOne(q.sid, q.name); return { ok: true, username: r.username, password: r.password };
     case 'mkall': return { ok: true, list: mkAll(q.list || []) };
     case 'delak': delAkun(q.sid); return { ok: true };
+    case 'folder': return listFolder(q.url);
   }
   return { ok: false, err: 'Aksi tidak dikenal.' };
 }
@@ -149,6 +150,29 @@ function mkAll(list) {
 function delAkun(sid) {
   var s = sheet('Akun', true), rows = akunRows();
   for (var i = rows.length - 1; i >= 0; i--) if (String(rows[i][3]) === String(sid)) s.deleteRow(i + 2);
+}
+
+/* ---------- Impor banyak PDF dari folder Google Drive ---------- */
+function listFolder(url) {
+  var m = String(url || '').match(/folders\/([\w-]+)|[?&]id=([\w-]+)/);
+  if (!m) return { ok: false, err: 'Tautan folder tidak valid. Pakai tautan folder Google Drive.' };
+  var root;
+  try { root = DriveApp.getFolderById(m[1] || m[2]); }
+  catch (e) { return { ok: false, err: 'Folder tidak ditemukan atau Anda tidak punya akses.' }; }
+  var out = [], stack = [root], priv = 0, MAX = 500;
+  while (stack.length && out.length < MAX) {
+    var f = stack.pop(), fi = f.getFiles(), fo = f.getFolders();
+    while (fi.hasNext() && out.length < MAX) {
+      var x = fi.next();
+      if (x.getMimeType() !== 'application/pdf') continue;
+      var acc = x.getSharingAccess();
+      if (acc !== DriveApp.Access.ANYONE && acc !== DriveApp.Access.ANYONE_WITH_LINK) priv++;
+      out.push({ n: x.getName().replace(/\.pdf$/i, ''), u: 'https://drive.google.com/file/d/' + x.getId() + '/view', s: x.getSize() });
+    }
+    while (fo.hasNext()) stack.push(fo.next());
+  }
+  out.sort(function (a, b) { return a.n < b.n ? -1 : a.n > b.n ? 1 : 0; });
+  return { ok: true, list: out, priv: priv, penuh: out.length >= MAX };
 }
 
 /* ---------- Penyimpanan data (tab "_Data", tersembunyi) ---------- */
