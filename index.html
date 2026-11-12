@@ -2,6 +2,7 @@
 <html lang="id"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Aplikasi Santri</title>
+<script src="config.js" onerror="void 0"></script>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#0c7a54">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -118,6 +119,7 @@ body.nolink .view{display:none!important}body.santri .adm{display:none!important
 <header class="top"><button class="ib" id="back" style="display:none">‹</button><div class="logo">☪</div>
 <div><h1>Aplikasi Santri</h1><small id="orgT"></small></div><div class="sp"></div>
 <button class="ib" id="who" style="width:auto;padding:0 12px;font-size:12px;font-weight:700">👤 Admin</button><button class="ib" id="theme">🌙</button></header>
+<div id="demoBar" style="display:none;background:#fdf1e3;color:#8a4b00;font-size:12px;line-height:1.5;padding:8px 14px;text-align:center;border-bottom:1px solid #f0d9b5">⚠ MODE DEMO: aplikasi belum terhubung ke Google Spreadsheet. Data hanya di perangkat ini dan santri belum bisa login. Isi alamat Apps Script di <b>config.js</b> (lihat panduan).</div>
 <main>
 <div class="card note" id="gate" style="display:none;margin-bottom:12px"></div>
 <section class="view on" id="v-home">
@@ -474,7 +476,7 @@ function sec(t,b,a){var k=t.split(' ')[0],add=(a&&adm())?'<div style="text-align
 A.pacc=function(k){proOpen[k]=!proOpen[k];renderPro()};
 
 /* ===== MODE WEB MANDIRI: Google Spreadsheet + login sendiri ===== */
-var API='PASTE_URL_WEB_APP_DI_SINI',REMOTE=/^https:\/\//.test(API),TOK='',LOADED=false,SAV=false,stm,SEEN={},SEENV={},lgF='Semua';
+var API=(window.SANTRI_API&&/^https:\/\//.test(window.SANTRI_API))?window.SANTRI_API:'PASTE_URL_WEB_APP_DI_SINI',NETERR='Tidak bisa terhubung ke server. Periksa alamat Apps Script di config.js dan pastikan deployment diatur Siapa saja.',REMOTE=/^https:\/\//.test(API),TOK='',LOADED=false,SAV=false,stm,SEEN={},SEENV={},lgF='Semua';
 try{TOK=localStorage.getItem('santri-tok')||''}catch(e){}
 function ensureK(){}
 function api(a,d){return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({a:a,tok:TOK},d||{}))}).then(function(r){return r.json()})}
@@ -507,9 +509,9 @@ function akunSec(x){var del='<button class="btn o" style="width:100%;color:#c24b
  return sec('Akun Santri',kv('Username',x.un||'(belum dibuat)')+kv('Terakhir aktif',SEEN[x.n]?ago(SEEN[x.n]):'belum pernah masuk')+'<button class="btn" style="width:100%;margin:8px 0" data-act="mkak" data-a="'+x.id+'">'+(x.un?'Reset kata sandi':'Buat akun')+'</button>'+del)}
 function showCred(n,u,p){var url=location.href.split('#')[0].split('?')[0],t="Assalamu'alaikum "+n+". Akun Aplikasi Santri Anda:\nAlamat: "+url+"\nUsername: "+u+"\nKata sandi: "+p+"\nSimpan dan jangan dibagikan ke orang lain.";
  $('cr1').innerHTML='<div class="kv"><span>Nama</span><b>'+esc(n)+'</b></div><div class="kv"><span>Username</span><b style="user-select:all">'+esc(u)+'</b></div><div class="kv"><span>Kata sandi</span><b style="user-select:all">'+esc(p)+'</b></div><small style="color:var(--soft);display:block;margin:8px 0 12px">Kata sandi hanya tampil sekarang. Catat atau kirim ke santri.</small><a class="btn" style="display:block;text-align:center;text-decoration:none;margin-bottom:8px" target="_blank" rel="noopener" href="https://wa.me/?text='+encodeURIComponent(t)+'">Kirim via WhatsApp</a>';$('cr').classList.add('on')}
-A.mkak=function(a){var x=sn(a);api('mkak',{sid:a,name:x.n}).then(function(r){if(!r.ok){toast(r.err||'Gagal membuat akun');return}x.un=r.username;lg('Akun dibuat/direset: '+x.n);R();showCred(x.n,r.username,r.password)}).catch(function(){toast('Tidak bisa terhubung ke server')})};
+A.mkak=function(a){var x=sn(a);api('mkak',{sid:a,name:x.n}).then(function(r){if(!r.ok){toast(r.err||'Gagal membuat akun');return}x.un=r.username;lg('Akun dibuat/direset: '+x.n);R();showCred(x.n,r.username,r.password)}).catch(function(){toast(NETERR)})};
 A.mkall=function(){if(!REMOTE){toast('Tersedia setelah aplikasi dihubungkan ke Google Spreadsheet');return}var L=DB.S.filter(function(x){return !x.un}).map(function(x){return{id:x.id,name:x.n}});if(!L.length){toast('Semua santri sudah punya akun');return}
- api('mkall',{list:L}).then(function(r){if(!r.ok){toast(r.err||'Gagal');return}var rows=[];r.list.forEach(function(q){var x=sn(q.id);if(x){x.un=q.username;rows.push({Nama:x.n,Kelas:x.kl,Kamar:x.km,Username:q.username,'Kata sandi':q.password})}});lg('Buat akun massal: '+rows.length+' santri');R();xl(rows,'Akun Santri','akun-santri-baru.xlsx');toast(rows.length+' akun dibuat. Simpan file Excel yang terunduh.')}).catch(function(){toast('Tidak bisa terhubung ke server')})};
+ api('mkall',{list:L}).then(function(r){if(!r.ok){toast(r.err||'Gagal');return}var rows=[];r.list.forEach(function(q){var x=sn(q.id);if(x){x.un=q.username;rows.push({Nama:x.n,Kelas:x.kl,Kamar:x.km,Username:q.username,'Kata sandi':q.password})}});lg('Buat akun massal: '+rows.length+' santri');R();xl(rows,'Akun Santri','akun-santri-baru.xlsx');toast(rows.length+' akun dibuat. Simpan file Excel yang terunduh.')}).catch(function(){toast(NETERR)})};
 A.sdel=function(a){var x=sn(a);form('Hapus santri '+x.n+'? Nilai, absen, hafalan, dan tabungannya ikut terhapus.',[],function(){DB.S=DB.S.filter(function(y){return y.id!=a});viewS=null;tsel=null;if(REMOTE)api('delak',{sid:a}).catch(function(){});lg('Menghapus santri '+x.n);R();go('san');toast('Santri dihapus')},'Hapus')};
 /* file lewat Google Drive */
 function driveId(u){var m=String(u||'').match(/\/d\/([\w-]+)|[?&]id=([\w-]+)/);return m?(m[1]||m[2]):''}
@@ -518,9 +520,9 @@ A.gbulk=function(){form('Tempel Banyak Tautan Kitab',[{k:'t',l:'Satu kitab per b
  r.t.split(/\r?\n/).forEach(function(line){line=line.trim();if(!line)return;var i=line.lastIndexOf('|'),ti=i>-1?line.slice(0,i).trim():'',u=(i>-1?line.slice(i+1):line).trim(),m=u.match(/https?:\/\/\S+/);u=m?m[0]:u;var id=driveId(u);if(!id){bad++;return}if(have[id]){dup++;return}have[id]=1;add.push({id:DB.nid++,n:ti||('Kitab '+(add.length+1)),t:'pdf',u:u,z:'Google Drive',d:fd()})});
  if(!add.length){toast(bad?bad+' baris tidak berisi tautan Google Drive yang valid':'Tidak ada tautan baru');return}
  DB.P=add.concat(DB.P);lg('Tempel banyak tautan: '+add.length+' kitab');R();toast(add.length+' kitab ditambahkan'+(dup?', '+dup+' sudah ada':'')+(bad?', '+bad+' baris dilewati':''))},'Tambahkan')};
-A.gfold=function(){form('Impor dari Folder Google Drive',[{k:'u',l:'Tautan folder Google Drive'}],function(r){toast('Membaca folder, mohon tunggu...');api('folder',{url:r.u}).then(function(x){if(!x.ok){toast(x.err||'Gagal membaca folder');return}
+A.gfold=function(){if(!REMOTE){toast('Impor folder aktif setelah aplikasi terhubung ke Google Spreadsheet. Isi alamat di config.js.');return}form('Impor dari Folder Google Drive',[{k:'u',l:'Tautan folder Google Drive'}],function(r){toast('Membaca folder, mohon tunggu...');api('folder',{url:r.u}).then(function(x){if(!x.ok){toast(x.err||'Gagal membaca folder');return}
  var have={};DB.P.forEach(function(q){have[driveId(q.u)]=1});var add=[];x.list.forEach(function(q){var id=driveId(q.u);if(!id||have[id])return;have[id]=1;add.push({id:DB.nid++,n:q.n,t:'pdf',u:q.u,z:q.s?(Math.round(q.s/104857.6)/10)+' MB':'Google Drive',d:fd()})});
- DB.P=add.concat(DB.P);lg('Impor folder Drive: '+add.length+' kitab');R();toast(add.length+' kitab ditambahkan'+(x.priv?'. '+x.priv+' file belum dibagikan ke "siapa saja yang memiliki link", santri tidak bisa membukanya.':'')+(x.penuh?' Batas 500 file tercapai, impor lagi dari subfolder lain.':''))}).catch(function(){toast('Tidak bisa terhubung ke server')})},'Impor')};
+ DB.P=add.concat(DB.P);lg('Impor folder Drive: '+add.length+' kitab');R();toast(add.length+' kitab ditambahkan'+(x.priv?'. '+x.priv+' file belum dibagikan ke "siapa saja yang memiliki link", santri tidak bisa membukanya.':'')+(x.penuh?' Batas 500 file tercapai, impor lagi dari subfolder lain.':''))}).catch(function(){toast(NETERR)})},'Impor')};
 A.fv=function(k,id){var it=itm(k,id),f=driveId(it&&it.u);if(!f){toast('Ini data contoh tanpa file. Hapus, lalu tambahkan dari Google Drive.');return}$('vt').textContent=it.n;$('vb').innerHTML='<iframe src="https://drive.google.com/file/d/'+f+'/preview" style="flex:1;border:0;width:100%" allow="autoplay"></iframe>';$('vd').onclick=function(){A.fd(k,id)};$('vm').classList.add('on');lg('Membuka '+it.n)};
 A.fd=function(k,id){var it=itm(k,id),f=driveId(it&&it.u);if(!f){toast('Tautan tidak valid');return}lg('Mengunduh '+it.n);var a=document.createElement('a');a.href='https://drive.google.com/uc?export=download&id='+f;a.target='_blank';a.rel='noopener';document.body.appendChild(a);a.click();a.remove()};
 A.ff=function(k,id){var it=itm(k,id);form('Hapus "'+it.n+'"?',[],function(){DB[k]=DB[k].filter(function(x){return x.id!=id});lg('Menghapus '+it.n);R()},'Hapus')};
@@ -528,6 +530,6 @@ $('vx').onclick=function(){$('vm').classList.remove('on');$('vb').innerHTML=''};
 if(REMOTE){var ar=document.querySelector('.row[data-act=acc]');if(ar){ar.querySelector('b').textContent='Keluar';ar.querySelector('small').textContent='Keluar dari akun ini'}}
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){navigator.serviceWorker.register('sw.js').catch(function(){})}
 renderQ();renderAll();
-if(REMOTE){TOK?loadRemote():showLogin()}
+if(REMOTE){TOK?loadRemote():showLogin()}else{$('demoBar').style.display='block'}
 })();
 </script></body></html>
