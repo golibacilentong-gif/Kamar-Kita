@@ -8,6 +8,7 @@
 var ADMIN_USER = 'admin';
 var ADMIN_PASS = '88347931';
 var SESI_HARI = 30;           // lama login tetap aktif (hari)
+var SERVER_VER = '2026.11.3'; // jangan diubah; dipakai aplikasi untuk memeriksa versi
 
 /* ---------- Pintu masuk ---------- */
 function doGet() { return out({ ok: true, info: 'API Aplikasi Santri aktif' }); }
@@ -40,8 +41,8 @@ function route(q) {
   }
   switch (q.a) {
     case 'load':
-      if (s.role === 'admin') return { ok: true, role: 'admin', db: db.S ? db : null, log: getLog(), seen: getSeen() };
-      return { ok: true, role: 'santri', sid: s.sid, db: forSantri(db, s.sid), log: [] };
+      if (s.role === 'admin') return { ok: true, ver: SERVER_VER, role: 'admin', db: db.S ? db : null, log: getLog(), seen: getSeen() };
+      return { ok: true, ver: SERVER_VER, role: 'santri', sid: s.sid, db: forSantri(db, s.sid), log: [] };
     case 'act': logAct(s, q.t); return { ok: true };
     case 'logout': dropTok(q.tok); return { ok: true };
   }
@@ -52,6 +53,8 @@ function route(q) {
     case 'mkall': return { ok: true, list: mkAll(q.list || []) };
     case 'delak': delAkun(q.sid); return { ok: true };
     case 'folder': return listFolder(q.url);
+    case 'upload': return upload(q.name, q.data);
+    case 'names': return { ok: true, map: names(q.ids || []) };
   }
   return { ok: false, err: 'Aksi tidak dikenal.' };
 }
@@ -152,13 +155,38 @@ function delAkun(sid) {
   for (var i = rows.length - 1; i >= 0; i--) if (String(rows[i][3]) === String(sid)) s.deleteRow(i + 2);
 }
 
+/* ---------- Izin Google Drive ----------
+   JALANKAN fungsi ini SEKALI dari editor Apps Script (pilih "izinkanDrive" di menu
+   fungsi, klik Jalankan, lalu Izinkan) agar fitur unggah dan impor kitab bisa bekerja. */
+function izinkanDrive() {
+  DriveApp.getRootFolder();
+  Logger.log('Izin Google Drive aktif. Sekarang terapkan Versi baru (Terapkan > Kelola deployment).');
+}
+function errMsg(e) {
+  var m = String(e && e.message ? e.message : e);
+  if (/permission|authoriz|scope/i.test(m)) {
+    return 'Skrip belum diberi izin Google Drive. Di Apps Script pilih fungsi izinkanDrive, klik Jalankan, lalu Izinkan; kemudian terapkan Versi baru. (' + m + ')';
+  }
+  return m;
+}
+function names(ids) {
+  var m = {};
+  ids.slice(0, 60).forEach(function (id) {
+    try { m[id] = DriveApp.getFileById(id).getName().replace(/\.pdf$/i, ''); } catch (e) { m[id] = ''; }
+  });
+  return m;
+}
+
 /* ---------- Impor banyak PDF dari folder Google Drive ---------- */
 function listFolder(url) {
   var m = String(url || '').match(/folders\/([\w-]+)|[?&]id=([\w-]+)/);
   if (!m) return { ok: false, err: 'Tautan folder tidak valid. Pakai tautan folder Google Drive.' };
   var root;
   try { root = DriveApp.getFolderById(m[1] || m[2]); }
-  catch (e) { return { ok: false, err: 'Folder tidak ditemukan atau Anda tidak punya akses.' }; }
+  catch (e) {
+    var em = errMsg(e);
+    return { ok: false, err: /izinkanDrive/.test(em) ? em : 'Folder tidak ditemukan atau akun pemilik Spreadsheet tidak punya akses ke folder itu. Bagikan folder ke akun tersebut, atau atur Siapa saja yang memiliki link. (' + em + ')' };
+  }
   var out = [], stack = [root], priv = 0, MAX = 500;
   while (stack.length && out.length < MAX) {
     var f = stack.pop(), fi = f.getFiles(), fo = f.getFolders();
@@ -173,6 +201,25 @@ function listFolder(url) {
   }
   out.sort(function (a, b) { return a.n < b.n ? -1 : a.n > b.n ? 1 : 0; });
   return { ok: true, list: out, priv: priv, penuh: out.length >= MAX };
+}
+
+/* ---------- Unggah PDF langsung dari HP/komputer ke Google Drive ---------- */
+function kitabFolder() {
+  var P = PropertiesService.getScriptProperties(), id = P.getProperty('kitab_folder'), f = null;
+  if (id) { try { f = DriveApp.getFolderById(id); } catch (e) { f = null; } }
+  if (!f) { f = DriveApp.createFolder('Perpustakaan Kitab - Aplikasi Santri'); P.setProperty('kitab_folder', f.getId()); }
+  return f;
+}
+function upload(name, b64) {
+  if (!name || !b64) return { ok: false, err: 'Data file kosong.' };
+  try {
+    var blob = Utilities.newBlob(Utilities.base64Decode(b64), 'application/pdf', String(name).slice(0, 150));
+    var file = kitabFolder().createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    return { ok: true, id: file.getId(), u: 'https://drive.google.com/file/d/' + file.getId() + '/view', s: file.getSize() };
+  } catch (e) {
+    return { ok: false, err: errMsg(e) };
+  }
 }
 
 /* ---------- Penyimpanan data (tab "_Data", tersembunyi) ---------- */
