@@ -151,7 +151,7 @@ body.nolink .view{display:none!important}body.santri .adm{display:none!important
 <section class="view" id="v-tab"><div id="tb"></div></section>
 <section class="view" id="v-pro"><div id="pr"></div></section>
 <section class="view" id="v-log"><div class="card" style="padding:4px 16px" id="lg"></div></section>
-<section class="view" id="v-menu"><div class="hd"><h2 id="mnN"></h2><p id="mnR"></p><p id="syn" style="font-size:11px;opacity:.85;margin:4px 0 0"></p></div>
+<section class="view" id="v-menu"><div class="hd"><h2 id="mnN"></h2><p id="mnR"></p><p id="syn" style="font-size:11px;opacity:.85;margin:4px 0 0"></p><p id="ver" style="font-size:11px;opacity:.85;margin:2px 0 0"></p></div>
 <button class="row" data-act="acc"><div class="num">🔁</div><div><b>Ganti akun</b><small>Masuk sebagai Admin atau santri</small></div></button>
 <button class="row sn" data-act="gopro"><div class="num">🪪</div><div><b>Profil Saya</b></div></button>
 <button class="row adm" data-go="san"><div class="num">🎓</div><div><b>Data Santri</b></div></button>
@@ -481,6 +481,8 @@ var API=(window.SANTRI_API&&/^https:\/\//.test(window.SANTRI_API))?window.SANTRI
 try{TOK=localStorage.getItem('santri-tok')||''}catch(e){}
 function ensureK(){}
 function api(a,d){return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({a:a,tok:TOK},d||{}))}).then(function(r){return r.json()})}
+var APP_VER='2026.11.3',SRV='';
+function setVer(){var e=$('ver');if(e)e.textContent='Versi aplikasi '+APP_VER+(REMOTE?' · versi server '+(SRV||'lama (perbarui Code.gs)'):'')}
 function setSync(t){var e=$('syn');if(e)e.textContent=t}
 function save(){if(!REMOTE){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}return}if(me!=='admin'||!LOADED)return;clearTimeout(stm);SAV=true;setSync('Menyimpan...');
  stm=setTimeout(function(){api('save',{db:DB}).then(function(r){SAV=false;if(!r.ok)toast('Gagal menyimpan: '+(r.err||''));else setSync('Tersimpan ke Google Spreadsheet '+new Date().toLocaleTimeString('id-ID'))}).catch(function(){SAV=false;toast('Gagal terhubung ke server')})},600)}
@@ -496,7 +498,7 @@ var _go=go;go=function(v){_go(v);if(REMOTE&&!adm()&&LOADED&&!SEENV[v]){SEENV[v]=
 /* login */
 function showLogin(msg){$('lgn').style.display='flex';$('le').textContent=msg||''}
 function applyLoad(r,first){DB=r.db||{org:'Pondok Pesantren',O:[],nid:1000,S:[],P:[],M:[],G:[],N:[],log:[]};['O','S','P','M','G','N'].forEach(function(k){if(!DB[k])DB[k]=[]});if(!DB.log)DB.log=[];ACT=r.log||[];SEEN=r.seen||{};
- if(first){me=r.role==='admin'?'admin':r.sid;viewS=me==='admin'?null:me;LOADED=true;SEENV={};$('lgn').style.display='none'}renderAll();if(first){go('home');setSync('Terhubung ke Google Spreadsheet')}}
+ if(first){me=r.role==='admin'?'admin':r.sid;viewS=me==='admin'?null:me;LOADED=true;SEENV={};$('lgn').style.display='none'}renderAll();if(first){SRV=r.ver||'';setVer();go('home');setSync('Terhubung ke Google Spreadsheet');if(r.role==='admin'&&SRV!==APP_VER)setTimeout(function(){toast('Code.gs di Apps Script belum versi terbaru. Tempel Code.gs baru lalu Terapkan Versi baru.')},800)}}
 function loadRemote(){return api('load').then(function(r){if(!r.ok){TOK='';try{localStorage.removeItem('santri-tok')}catch(e){}showLogin(r.err);return}applyLoad(r,true)}).catch(function(){showLogin('Tidak bisa terhubung ke server. Periksa internet Anda.')})}
 $('lb').onclick=function(){var u=$('lu').value.trim(),p=$('lp').value;if(!u||!p){$('le').textContent='Isi username dan kata sandi';return}$('lb').disabled=true;$('le').textContent='';
  api('login',{u:u,p:p}).then(function(r){$('lb').disabled=false;if(!r.ok){$('le').textContent=r.err||'Gagal masuk';return}TOK=r.tok;try{localStorage.setItem('santri-tok',TOK)}catch(e){}$('lp').value='';return loadRemote()}).catch(function(){$('lb').disabled=false;$('le').textContent='Tidak bisa terhubung ke server'})};
@@ -517,10 +519,14 @@ A.sdel=function(a){var x=sn(a);form('Hapus santri '+x.n+'? Nilai, absen, hafalan
 /* file lewat Google Drive */
 function driveId(u){var m=String(u||'').match(/\/d\/([\w-]+)|[?&]id=([\w-]+)/);return m?(m[1]||m[2]):''}
 A.gdl=function(k){form('Tambah dari Google Drive',[{k:'n',l:'Judul'},{k:'u',l:'Tautan Google Drive (Bagikan: Siapa saja yang memiliki link)'},{k:'j',l:'Jenis',o:['PDF','Word','Lainnya']}],function(r){if(!driveId(r.u)){toast('Tautan Google Drive tidak valid');return}DB[k].unshift({id:DB.nid++,n:r.n,t:r.j==='PDF'?'pdf':'doc',u:r.u,z:'Google Drive',d:fd()});lg('Menambah '+(k==='P'?'kitab ':'materi ')+r.n);R()},'Tambah')};
-A.gbulk=function(){form('Tempel Banyak Tautan Kitab',[{k:'t',l:'Satu kitab per baris. Format: Judul | tautan Google Drive (judul boleh dikosongkan, cukup tautan)',t:'textarea'}],function(r){var have={},add=[],bad=0,dup=0;DB.P.forEach(function(q){have[driveId(q.u)]=1});
- r.t.split(/\r?\n/).forEach(function(line){line=line.trim();if(!line)return;var i=line.lastIndexOf('|'),ti=i>-1?line.slice(0,i).trim():'',u=(i>-1?line.slice(i+1):line).trim(),m=u.match(/https?:\/\/\S+/);u=m?m[0]:u;var id=driveId(u);if(!id){bad++;return}if(have[id]){dup++;return}have[id]=1;add.push({id:DB.nid++,n:ti||('Kitab '+(add.length+1)),t:'pdf',u:u,z:'Google Drive',d:fd()})});
- if(!add.length){toast(bad?bad+' baris tidak berisi tautan Google Drive yang valid':'Tidak ada tautan baru');return}
- DB.P=add.concat(DB.P);lg('Tempel banyak tautan: '+add.length+' kitab');R();toast(add.length+' kitab ditambahkan'+(dup?', '+dup+' sudah ada':'')+(bad?', '+bad+' baris dilewati':''))},'Tambahkan')};
+A.gbulk=function(){form('Tempel Banyak Tautan Kitab',[{k:'t',l:'Tempel semua tautan Google Drive, satu per baris (atau berurutan). Judul diambil otomatis dari Drive. Untuk judul sendiri: Judul | tautan',t:'textarea'}],function(r){
+ var have={},items=[],bad=0,dup=0;DB.P.forEach(function(q){have[driveId(q.u)]=1});
+ r.t.split(/\r?\n/).forEach(function(line){line=line.trim();if(!line)return;var i=line.lastIndexOf('|');
+  if(i>-1){var ti=line.slice(0,i).trim(),m=line.slice(i+1).match(/https?:\/\/\S+/),u=m?m[0]:'',id=driveId(u);if(!id){bad++;return}if(have[id]){dup++;return}have[id]=1;items.push({id:id,u:u,ti:ti});return}
+  var ms=line.match(/https?:\/\/[^\s|,;]+/g);if(!ms){bad++;return}ms.forEach(function(u){var id=driveId(u);if(!id){bad++;return}if(have[id]){dup++;return}have[id]=1;items.push({id:id,u:u,ti:''})})});
+ if(!items.length){toast(bad?bad+' baris tidak berisi tautan Google Drive yang valid':'Tidak ada tautan baru');return}
+ var need=items.filter(function(x){return !x.ti}),fin=function(map){var add=items.map(function(x,k){return{id:DB.nid++,n:x.ti||(map&&map[x.id])||('Kitab '+(k+1)),t:'pdf',u:x.u,z:'Google Drive',d:fd()}});DB.P=add.concat(DB.P);lg('Tempel banyak tautan: '+add.length+' kitab');R();toast(add.length+' kitab ditambahkan'+(dup?', '+dup+' sudah ada':'')+(bad?', '+bad+' dilewati':''))};
+ if(REMOTE&&need.length){toast('Mengambil judul dari Google Drive...');var ids=need.map(function(x){return x.id}),map={},k=0;(function nx(){if(k>=ids.length){fin(map);return}api('names',{ids:ids.slice(k,k+40)}).then(function(x){if(x.ok)Object.assign(map,x.map);k+=40;nx()}).catch(function(){k+=40;nx()})})()}else fin(null)},'Tambahkan')};
 A.gfold=function(){if(!REMOTE){toast('Impor folder aktif setelah aplikasi terhubung ke Google Spreadsheet. Isi alamat di config.js.');return}form('Impor dari Folder Google Drive',[{k:'u',l:'Tautan folder Google Drive'}],function(r){toast('Membaca folder, mohon tunggu...');api('folder',{url:r.u}).then(function(x){if(!x.ok){toast(x.err||'Gagal membaca folder');return}
  var have={};DB.P.forEach(function(q){have[driveId(q.u)]=1});var add=[];x.list.forEach(function(q){var id=driveId(q.u);if(!id||have[id])return;have[id]=1;add.push({id:DB.nid++,n:q.n,t:'pdf',u:q.u,z:q.s?(Math.round(q.s/104857.6)/10)+' MB':'Google Drive',d:fd()})});
  DB.P=add.concat(DB.P);lg('Impor folder Drive: '+add.length+' kitab');R();toast(add.length+' kitab ditambahkan'+(x.priv?'. '+x.priv+' file belum dibagikan ke "siapa saja yang memiliki link", santri tidak bisa membukanya.':'')+(x.penuh?' Batas 500 file tercapai, impor lagi dari subfolder lain.':''))}).catch(function(){toast(NETERR)})},'Impor')};
@@ -569,7 +575,7 @@ A.fdel=function(a){var x=sn(a);delete x.foto;lg('Hapus foto '+x.n);R()};
 $('fotoIn').onchange=function(e){var f=e.target.files[0];e.target.value='';if(!f||!fotoId)return;var x=sn(fotoId),rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){var z=Math.min(im.width,im.height),c=document.createElement('canvas');c.width=c.height=160;c.getContext('2d').drawImage(im,(im.width-z)/2,(im.height-z)/2,z,z,0,0,160,160);x.foto=c.toDataURL('image/jpeg',0.72);lg('Ubah foto '+x.n);R();toast('Foto disimpan')};im.onerror=function(){toast('File bukan gambar yang valid')};im.src=rd.result};rd.readAsDataURL(f)};
 
 if('serviceWorker' in navigator&&/^https?:/.test(location.protocol)){navigator.serviceWorker.register('sw.js').catch(function(){})}
-renderQ();renderAll();
+renderQ();renderAll();setVer();
 if(REMOTE){TOK?loadRemote():showLogin()}else{$('demoBar').style.display='block'}
 })();
 </script></body></html>
