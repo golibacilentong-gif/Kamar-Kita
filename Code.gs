@@ -8,7 +8,7 @@
 var ADMIN_USER = 'admin';
 var ADMIN_PASS = '88347931';
 var SESI_HARI = 30;           // lama login tetap aktif (hari)
-var SERVER_VER = '2026.11.3'; // jangan diubah; dipakai aplikasi untuk memeriksa versi
+var SERVER_VER = '2026.11.4'; // jangan diubah; dipakai aplikasi untuk memeriksa versi
 
 /* ---------- Pintu masuk ---------- */
 function doGet() { return out({ ok: true, info: 'API Aplikasi Santri aktif' }); }
@@ -55,6 +55,7 @@ function route(q) {
     case 'folder': return listFolder(q.url);
     case 'upload': return upload(q.name, q.data);
     case 'names': return { ok: true, map: names(q.ids || []) };
+    case 'pass': return { ok: true, pass: getPass(q.sid) };
   }
   return { ok: false, err: 'Aksi tidak dikenal.' };
 }
@@ -113,9 +114,9 @@ function sheet(n, hide) {
 }
 function akunRows() {
   var s = sheet('Akun', true), n = s.getLastRow();
-  if (n < 1) { s.appendRow(['Username', 'Salt', 'Hash', 'ID Santri', 'Nama', 'Dibuat']); return []; }
+  if (n < 1) { s.appendRow(['Username', 'Salt', 'Hash', 'ID Santri', 'Nama', 'Dibuat', 'Sandi (hanya admin)']); return []; }
   if (n < 2) return [];
-  return s.getRange(2, 1, n - 1, 6).getValues();
+  return s.getRange(2, 1, n - 1, 7).getValues();
 }
 function findAkun(u) {
   var rows = akunRows();
@@ -130,6 +131,7 @@ function mkOne(sid, name) {
   for (var i = 0; i < rows.length; i++) {
     if (String(rows[i][3]) === String(sid)) {
       s.getRange(i + 2, 2, 1, 2).setValues([[salt, h]]);
+      s.getRange(i + 2, 7).setValue(pw);
       return { username: rows[i][0], password: pw };
     }
   }
@@ -137,7 +139,7 @@ function mkOne(sid, name) {
   rows.forEach(function (r) { used[String(r[0]).toLowerCase()] = 1; });
   used[ADMIN_USER.toLowerCase()] = 1;
   while (used[un]) { k++; un = base + k; }
-  s.appendRow([un, salt, h, sid, name, new Date()]);
+  s.appendRow([un, salt, h, sid, name, new Date(), pw]);
   return { username: un, password: pw };
 }
 function mkAll(list) {
@@ -149,6 +151,11 @@ function mkAll(list) {
     out.push({ id: x.id, username: r.username, password: r.password });
   });
   return out;
+}
+function getPass(sid) {
+  var rows = akunRows();
+  for (var i = 0; i < rows.length; i++) if (String(rows[i][3]) === String(sid)) return String(rows[i][6] || '');
+  return '';
 }
 function delAkun(sid) {
   var s = sheet('Akun', true), rows = akunRows();
@@ -187,17 +194,17 @@ function listFolder(url) {
     var em = errMsg(e);
     return { ok: false, err: /izinkanDrive/.test(em) ? em : 'Folder tidak ditemukan atau akun pemilik Spreadsheet tidak punya akses ke folder itu. Bagikan folder ke akun tersebut, atau atur Siapa saja yang memiliki link. (' + em + ')' };
   }
-  var out = [], stack = [root], priv = 0, MAX = 500;
+  var out = [], stack = [{ f: root, n: '' }], priv = 0, MAX = 500;
   while (stack.length && out.length < MAX) {
-    var f = stack.pop(), fi = f.getFiles(), fo = f.getFolders();
+    var cur = stack.pop(), f = cur.f, fi = f.getFiles(), fo = f.getFolders();
     while (fi.hasNext() && out.length < MAX) {
       var x = fi.next();
       if (x.getMimeType() !== 'application/pdf') continue;
       var acc = x.getSharingAccess();
       if (acc !== DriveApp.Access.ANYONE && acc !== DriveApp.Access.ANYONE_WITH_LINK) priv++;
-      out.push({ n: x.getName().replace(/\.pdf$/i, ''), u: 'https://drive.google.com/file/d/' + x.getId() + '/view', s: x.getSize() });
+      out.push({ n: x.getName().replace(/\.pdf$/i, ''), u: 'https://drive.google.com/file/d/' + x.getId() + '/view', s: x.getSize(), f: cur.n });
     }
-    while (fo.hasNext()) stack.push(fo.next());
+    while (fo.hasNext()) { var sf = fo.next(); stack.push({ f: sf, n: cur.n || sf.getName() }); }
   }
   out.sort(function (a, b) { return a.n < b.n ? -1 : a.n > b.n ? 1 : 0; });
   return { ok: true, list: out, priv: priv, penuh: out.length >= MAX };
@@ -268,17 +275,21 @@ function getSeen() {
 }
 
 /* ---------- Cermin ke tab Spreadsheet yang mudah dibaca ---------- */
-function put(name, head, rows) {
+function put(name, head, rows, asText) {
   var s = sheet(name);
   s.clear();
   s.getRange(1, 1, 1, head.length).setValues([head]).setFontWeight('bold');
-  if (rows.length) s.getRange(2, 1, rows.length, head.length).setValues(rows);
+  if (rows.length) {
+    var r = s.getRange(2, 1, rows.length, head.length);
+    if (asText) r.setNumberFormat('@');
+    r.setValues(rows);
+  }
   s.setFrozenRows(1);
 }
 function mirror(db) {
   var S = db.S || [], t = function (x) { return x ? new Date(x) : ''; };
-  put('Santri', ['ID', 'Nama', 'Tempat, Tanggal Lahir', 'Alamat', 'Kelas', 'Kamar', 'Status', 'Username'],
-    S.map(function (x) { return [x.id, x.n, x.ttl, x.al, x.kl, x.km, x.aktif === false ? 'Nonaktif' : 'Aktif', x.un || '']; }));
+  put('Santri', ['ID', 'Nama', 'Tempat, Tanggal Lahir', 'Alamat', 'Kelas', 'Kamar', 'No. WhatsApp', 'Status', 'Username'],
+    S.map(function (x) { return [x.id, x.n, x.ttl, x.al, x.kl, x.km, x.tel || '', x.aktif === false ? 'Nonaktif' : 'Aktif', x.un || '']; }), true);
   var pg = [];
   (db.O || []).forEach(function (o) { (o.m || []).forEach(function (m) { pg.push([o.n, m.n, m.j, m.k, m.r]); }); });
   put('Pengurus', ['Organisasi', 'Nama', 'Jabatan', 'Kelas', 'Kamar'], pg);
@@ -296,6 +307,6 @@ function mirror(db) {
   put('Tabungan', ['Waktu', 'Santri', 'Jenis', 'Keperluan', 'Nominal'], tb);
   put('Agenda', ['Tanggal', 'Judul', 'Jam', 'Tempat'], (db.G || []).map(function (g) { return [g.d, g.j, g.w || '', g.p || '']; }));
   put('Pengumuman', ['Waktu', 'Judul', 'Isi'], (db.N || []).map(function (n) { return [t(n.t), n.j, n.i]; }));
-  put('Perpustakaan', ['Judul', 'Tautan Google Drive', 'Ditambahkan'], (db.P || []).map(function (x) { return [x.n, x.u || '', x.d || '']; }));
+  put('Perpustakaan', ['Judul', 'Folder (Fan)', 'Tautan Google Drive', 'Ditambahkan'], (db.P || []).map(function (x) { return [x.n, x.f || '', x.u || '', x.d || '']; }));
   put('Materi', ['Judul', 'Tautan Google Drive', 'Ditambahkan'], (db.M || []).map(function (x) { return [x.n, x.u || '', x.d || '']; }));
 }
